@@ -8,12 +8,12 @@ Feature: Sign up
     When I press Sign Up
     Then I am signed up "<signedUp>"
     Examples:
-      | browser | email  | username | password        | signedUp |
-      | chrome  | blabla | blabla   | .BQwvnE-Nu!L4aw | success  |
-      | chrome  | a      | long     | .BQwvnE-Nu!L4aw | fail     |
-      | chrome  | x      | existing | .BQwvnE-Nu!L4aw | fail     |
-      | chrome  |        | anon     | .BQwvnE-Nu!L4aw | fail     |
-      | edge    | blabla | haha     | .BQwvnE-Nu!L4aw | success  |
-      | edge    | b      | long     | .BQwvnE-Nu!L4aw | fail     |
-      | edge    | c      | existing | .BQwvnE-Nu!L4aw | fail     |
-      | edge    |        | anon     | .BQwvnE-Nu!L4aw | fail     |
+      | browser | email    | username | password        | signedUp |
+      | chrome  | valid    | valid    | .BQwvnE-Nu!L4aw | success  |
+      | chrome  | long     | long     | .BQwvnE-Nu!L4aw | fail     |
+      | chrome  | existing | existing | .BQwvnE-Nu!L4aw | fail     |
+      | chrome  |          | anon     | .BQwvnE-Nu!L4aw | fail     |
+      | edge    | valid    | valid    | .BQwvnE-Nu!L4aw | success  |
+      | edge    | long     | long     | .BQwvnE-Nu!L4aw | fail     |
+      | edge    | existing | existing | .BQwvnE-Nu!L4aw | fail     |
+      | edge    |          | anon     | .BQwvnE-Nu!L4aw | fail     |

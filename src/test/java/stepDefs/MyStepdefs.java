@@ -14,7 +14,6 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.testng.internal.ExitCode;
 
 import java.time.Duration;
 import java.util.Random;
@@ -27,7 +26,7 @@ public class MyStepdefs {
 
     @Given("I use {string}")
     public void iUse(String browser) {
-         if (browser.equalsIgnoreCase("edge")) {
+        if (browser.equalsIgnoreCase("edge")) {
             System.setProperty("webdriver.edge.driver", "D:\\Program\\EdgeDriver/msedgedriver.exe");
             EdgeOptions edgeOptions = new EdgeOptions();
             edgeOptions.addArguments("--remote-allow-origins=*", "ignore-certificate-errors");
@@ -49,21 +48,19 @@ public class MyStepdefs {
     public void iEnterEmail(String email) {
         String domain = "@a.b";
         if (!email.equalsIgnoreCase("")) {
-            waitUntilPresent("email");
+            waitUntilPresent(By.id("email"));
             driver.findElement(By.id("email")).sendKeys(email + RandomText() + domain);
         }
     }
 
     @Given("I enter {string} as username")
     public void iEnterUsername(String username) {
-        waitUntilPresent("new_username");
+        waitUntilPresent(By.id("new_username"));
         WebElement field = driver.findElement(By.id("new_username"));
         field.click();
         field.clear();
         if (username.equalsIgnoreCase("long")) {
-            for (int i = 0; i < 5; i++) {
-                username += username;
-            }
+            username = "longlonglonglonglonglonglonglonglonglonglonglonlonglonglonglonglonglonglonglonglonglonglonglonglonglonglong";
             username += RandomText();
         } else if (username.equalsIgnoreCase("existing")) {
         } else {
@@ -74,7 +71,7 @@ public class MyStepdefs {
 
     @Given("I enter {string} as password")
     public void iEnterPassword(String password) {
-        waitUntilPresent("new_password");
+        waitUntilPresent(By.id("new_password"));
         driver.findElement(By.id("new_password")).sendKeys(password);
     }
 
@@ -84,7 +81,7 @@ public class MyStepdefs {
         WebElement checkBox = driver.findElement(By.name("marketing_newsletter"));
         checkBox.click();
 
-        waitUntilPresent("create-account-enabled");
+        waitUntilPresent(By.id("create-account-enabled"));
         WebElement button = driver.findElement(By.id("create-account-enabled"));
         action.moveToElement(button).perform();
         button.click();
@@ -96,19 +93,40 @@ public class MyStepdefs {
         boolean expected = signedUp.equalsIgnoreCase("success");
         boolean actual;
         wait.until(ExpectedConditions.or(
-                ExpectedConditions.presenceOfElementLocated(By.className("invalid-error")),
                 ExpectedConditions.presenceOfElementLocated(By.id("resend-email-link")),
+                ExpectedConditions.presenceOfElementLocated(By.cssSelector(".error-page centered")),
+                ExpectedConditions.textToBePresentInElementLocated(By.className("invalid-error"), "An email address must contain a single @."),
+                ExpectedConditions.textToBePresentInElementLocated(By.className("invalid-error"), "Enter a value less than 100 characters long"),
+                ExpectedConditions.textToBePresentInElementLocated(By.className("invalid-error"), "Great minds think alike - someone already has this username."),
                 ExpectedConditions.frameToBeAvailableAndSwitchToIt(3)));
 
-        if (signedUp.equalsIgnoreCase("success") && elementExistsID("resend-email-link")) {
+        if (signedUp.equalsIgnoreCase("success") && elementExists(By.id("resend-email-link"))) {
+            System.out.println("Success");
             actual = true;
-        } else if (!signedUp.equalsIgnoreCase("success") && elementExistsClass("invalid-error")) {
+        } else if (!signedUp.equalsIgnoreCase("success") && elementExists(By.className("invalid-error"))) {
+            if (driver.findElement(By.className("invalid-error")).getText().equals("An email address must contain a single @.")) {
+                System.out.println("An email address must contain a single @.");
+                actual = false;
+            } else if (driver.findElement(By.className("invalid-error")).getText().equals("Enter a value less than 100 characters long")) {
+                System.out.println("Enter a value less than 100 characters long");
+                actual = false;
+            } else if (driver.findElement(By.className("invalid-error")).getText().contains("Great minds think alike - someone already has this username.")) {
+                System.out.println("Great minds think alike - someone already has this username.");
+                actual = false;
+            } else {
+                System.out.println("Other");
+                actual = !expected;
+            }
+        } else if (!signedUp.equalsIgnoreCase("success") && elementExists(By.cssSelector(".error-page centered"))) {
+            System.out.println("Error page");
             actual = false;
-        } else if (signedUp.equalsIgnoreCase("success") && elementExistsID("recaptcha-help-button")) {
-            actual = true;
-        } else if (!signedUp.equalsIgnoreCase("success") && elementExistsID("recaptcha-help-button")) {
-            actual = false;
-        } else actual = !expected;
+        } else if (elementExists(By.id("recaptcha-help-button"))) {
+            actual = expected;
+            System.out.println("Captcha");
+        } else {
+            System.out.println("Unexpected error");
+            actual = !expected;
+        }
 
         assertEquals(expected, actual);
     }
@@ -126,25 +144,17 @@ public class MyStepdefs {
         return String.valueOf(n);
     }
 
-    private boolean elementExistsID(String id) {
+    private boolean elementExists(By by) {
         try {
-            driver.findElement(By.id(id));
+            driver.findElement(by);
         } catch (Exception e) {
             return false;
         }
         return true;
     }
 
-    private boolean elementExistsClass(String className) {
-        try {
-            driver.findElement(By.className(className));
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
+    private void waitUntilPresent(By by) {
+        wait.until(ExpectedConditions.presenceOfElementLocated(by));
     }
 
-    private void waitUntilPresent(String id) {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.id(id)));
-    }
 }
